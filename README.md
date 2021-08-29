@@ -14,8 +14,8 @@ this tool to do it for you!
 ```console
 ❯ OBS_CHECK_INTERVAL=2 \
   OBS_FACE_SOURCE=Webcam \
-  OBS_BRB_SCENE=BRB \
+  OBS_SCENE_BRB='zzz BRB' \
   OBS_HOST="$WSL_HOST:4444" \
   OBS_PASSWORD=hello \
-  go run github.com/andreykaipov/obs-face-detection-demo
+  go run ./...
 ```

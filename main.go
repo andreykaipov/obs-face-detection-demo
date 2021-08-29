@@ -12,6 +12,22 @@ import (
 	"github.com/andreykaipov/goobs/api/typedefs"
 )
 
+var (
+	obsFaceSource    string
+	obsCheckInterval int
+
+	sceneOG     string
+	sceneActive string
+	sceneBRB    string
+)
+
+func init() {
+	obsFaceSource = getenv("OBS_FACE_SOURCE", "Webcam")
+	sceneBRB = getenv("OBS_SCENE_BRB", "")
+
+	obsCheckInterval, _ = strconv.Atoi(getenv("OBS_CHECK_INTERVAL", "15"))
+}
+
 func main() {
 	obs, err := NewOBS(os.Getenv("OBS_HOST"), os.Getenv("OBS_PASSWORD"))
 	if err != nil {
@@ -23,91 +39,81 @@ func main() {
 		log.Fatal(err)
 	}
 
-	obsFaceSource := getenv("OBS_FACE_SOURCE", "Webcam")
-	obsCheckInterval := getenv("OBS_CHECK_INTERVAL", "15")
-	brbScene := getenv("OBS_BRB_SCENE", "BRB")
-	interval, _ := strconv.Atoi(obsCheckInterval)
+	sceneOG = scene.Name
+	sceneActive = sceneOG
 
-	activeScene := scene.Name
-	swapScene := ""
+	log.Printf("Current scene is %q. Using that as our original and active scene.", scene.Name)
 
-	if activeScene == swapScene {
-		log.Fatalf("Active scene %q is set to brb scene %q already.", activeScene, brbScene)
+	if sceneActive == sceneBRB {
+		log.Fatalf("Active scene %q is set to brb scene %q already.", sceneActive, sceneBRB)
 	}
 
-	log.Printf("Current scene is %s. Using that as our original and active scene.", scene.Name)
-
-	for range time.Tick(time.Duration(interval) * time.Second) {
+	for range time.Tick(time.Duration(obsCheckInterval) * time.Second) {
 		face, err := obs.DetectFace(obsFaceSource)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		if face {
-			swapScene = scene.Name
-			activeScene = handleFace(obs, activeScene, swapScene)
+			handleFace(obs)
 		} else {
-			swapScene = brbScene
-			activeScene = handleNoFace(obs, activeScene, swapScene)
+			handleNoFace(obs)
 		}
 	}
 
 }
 
-// Takes the currently active scene, the scene to swap to, and returns the new
-// active scene, i.e. the swap scene.
-func handleFace(obs *OBS, activeScene, swapScene string) string {
+func handleFace(obs *OBS) {
 	msg := "Detected a face"
 
-	if activeScene == swapScene {
-		msg += fmt.Sprintf(", but we're already in the %q scene so no point in setting it again", swapScene)
+	if sceneActive == sceneOG {
+		msg += fmt.Sprintf(", but we're already in the %q scene so no point in setting it again", sceneOG)
 		log.Println(msg)
-		return activeScene
+		return
 	}
 
 	log.Println(msg)
+	log.Printf("Setting the %q scene", sceneOG)
 
-	if _, err := obs.Client.Scenes.SetCurrentScene(&scenes.SetCurrentSceneParams{SceneName: swapScene}); err != nil {
+	if _, err := obs.Client.Scenes.SetCurrentScene(&scenes.SetCurrentSceneParams{SceneName: sceneOG}); err != nil {
 		log.Fatal(err)
 	}
 
 	if _, err := obs.Client.SceneItems.DeleteSceneItem(&sceneitems.DeleteSceneItemParams{
-		Scene: activeScene,
-		Item:  &typedefs.Item{Name: swapScene},
+		Scene: sceneBRB + " active blurred",
+		Item:  &typedefs.Item{Name: sceneOG},
 	}); err != nil {
 		log.Fatal(err)
 	}
 
-	return swapScene
+	sceneActive = sceneOG
 }
 
-// Takes the currently active scene, the scene to swap to, and returns the new
-// active scene, i.e. the swap scene.
-func handleNoFace(obs *OBS, activeScene, swapScene string) string {
+func handleNoFace(obs *OBS) {
 	msg := "No faces"
 
-	if activeScene == swapScene {
-		msg += fmt.Sprintf(", but we're already in the %q scene so no point in setting it again", swapScene)
+	if sceneActive == sceneBRB {
+		msg += fmt.Sprintf(", but we're already in the %q scene so no point in setting it again", sceneBRB)
 		log.Println(msg)
-		return activeScene
+		return
 	}
 
 	log.Println(msg)
-	log.Printf("Setting the %q scene", swapScene)
+	log.Printf("Setting the %q scene", sceneBRB)
 
-	if _, err := obs.Client.Scenes.SetCurrentScene(&scenes.SetCurrentSceneParams{SceneName: swapScene}); err != nil {
+	if _, err := obs.Client.Scenes.SetCurrentScene(&scenes.SetCurrentSceneParams{SceneName: sceneBRB}); err != nil {
 		log.Fatal(err)
 	}
 
 	if _, err := obs.Client.SceneItems.AddSceneItem(&sceneitems.AddSceneItemParams{
-		SceneName:  swapScene,
-		SourceName: activeScene,
+		SceneName:  sceneBRB + " active blurred",
+		SourceName: sceneOG,
 		SetVisible: true,
 	}); err != nil {
 		log.Fatal(err)
 	}
 
-	return swapScene
+	sceneActive = sceneBRB
 }
 
 func getenv(envvar string, d string) string {
