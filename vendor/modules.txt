@@ -1,0 +1,27 @@
+# github.com/andreykaipov/goobs v0.7.1
+## explicit
+github.com/andreykaipov/goobs
+github.com/andreykaipov/goobs/api/events
+github.com/andreykaipov/goobs/api/requests
+github.com/andreykaipov/goobs/api/requests/general
+github.com/andreykaipov/goobs/api/requests/media_control
+github.com/andreykaipov/goobs/api/requests/outputs
+github.com/andreykaipov/goobs/api/requests/profiles
+github.com/andreykaipov/goobs/api/requests/recording
+github.com/andreykaipov/goobs/api/requests/replay_buffer
+github.com/andreykaipov/goobs/api/requests/scene_collections
+github.com/andreykaipov/goobs/api/requests/scene_items
+github.com/andreykaipov/goobs/api/requests/scenes
+github.com/andreykaipov/goobs/api/requests/sources
+github.com/andreykaipov/goobs/api/requests/streaming
+github.com/andreykaipov/goobs/api/requests/studio_mode
+github.com/andreykaipov/goobs/api/requests/transitions
+github.com/andreykaipov/goobs/api/requests/virtual_cam
+github.com/andreykaipov/goobs/api/typedefs
+# github.com/esimov/pigo v1.4.4
+## explicit
+github.com/esimov/pigo/core
+# github.com/gorilla/websocket v1.4.2
+github.com/gorilla/websocket
+# github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d
+github.com/nu7hatch/gouuid
