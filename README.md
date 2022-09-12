@@ -11,11 +11,4 @@ this tool to do it for you!
 
 ## usage
 
-```console
-❯ OBS_CHECK_INTERVAL=2 \
-  OBS_FACE_SOURCE=Webcam \
-  OBS_SCENE_BRB='zzz BRB' \
-  OBS_HOST="$WSL_HOST:4444" \
-  OBS_PASSWORD=hello \
-  go run ./...
-```
+See the `run.sh` script.
