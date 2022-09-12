@@ -18,6 +18,9 @@ github.com/andreykaipov/goobs/api/requests/studio_mode
 github.com/andreykaipov/goobs/api/requests/transitions
 github.com/andreykaipov/goobs/api/requests/virtual_cam
 github.com/andreykaipov/goobs/api/typedefs
+# github.com/armon/circbuf v0.0.0-20190214190532-5111143e8da2 => github.com/lmbarros/circbuf v0.0.0-20210517183655-6912bf9840a2
+## explicit
+github.com/armon/circbuf
 # github.com/esimov/pigo v1.4.4
 ## explicit
 github.com/esimov/pigo/core
@@ -25,3 +28,4 @@ github.com/esimov/pigo/core
 github.com/gorilla/websocket
 # github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d
 github.com/nu7hatch/gouuid
+# github.com/armon/circbuf => github.com/lmbarros/circbuf v0.0.0-20210517183655-6912bf9840a2
