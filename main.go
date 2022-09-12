@@ -5,16 +5,19 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	sceneitems "github.com/andreykaipov/goobs/api/requests/scene_items"
 	"github.com/andreykaipov/goobs/api/requests/scenes"
 	"github.com/andreykaipov/goobs/api/typedefs"
+	"github.com/armon/circbuf"
 )
 
 var (
-	obsFaceSource    string
-	obsCheckInterval int
+	obsFaceSource         string
+	obsFaceCheckInterval  int
+	obsFaceCheckThreshold int
 
 	sceneOG     string
 	sceneActive string
@@ -25,7 +28,8 @@ func init() {
 	obsFaceSource = getenv("OBS_FACE_SOURCE", "Webcam")
 	sceneBRB = getenv("OBS_SCENE_BRB", "")
 
-	obsCheckInterval, _ = strconv.Atoi(getenv("OBS_CHECK_INTERVAL", "15"))
+	obsFaceCheckInterval, _ = strconv.Atoi(getenv("OBS_FACE_CHECK_INTERVAL", "15"))
+	obsFaceCheckThreshold, _ = strconv.Atoi(getenv("OBS_FACE_CHECK_THRESHOLD", "3"))
 }
 
 func main() {
@@ -48,16 +52,26 @@ func main() {
 		log.Fatalf("Active scene %q is set to brb scene %q already.", sceneActive, sceneBRB)
 	}
 
-	for range time.Tick(time.Duration(obsCheckInterval) * time.Second) {
+	buf, _ := circbuf.NewBuffer(int64(obsFaceCheckThreshold))
+
+	for range time.Tick(time.Duration(obsFaceCheckInterval) * time.Second) {
 		face, err := obs.DetectFace(obsFaceSource)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		if face {
-			handleFace(obs)
+			buf.WriteByte('1')
 		} else {
+			buf.WriteByte('0')
+		}
+
+		fmt.Println(buf)
+
+		if strings.Count(buf.String(), "0") == int(buf.Size()) {
 			handleNoFace(obs)
+		} else {
+			handleFace(obs)
 		}
 	}
 
